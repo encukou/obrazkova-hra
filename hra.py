@@ -86,7 +86,13 @@ class Board:
         for x, column in enumerate(self.content):
             for y, tile in enumerate(column):
                 selected = (x, y) == board.last_mouse_pos
-                tile.draw(x, y, window, selected)
+                if not selected:
+                    tile.draw(x, y, window, selected)
+
+        x, y = board.last_mouse_pos
+        if 0 <= x < COLUMNS and 0 <= y < ROWS:
+            tile = self.content[x][y]
+            tile.draw(x, y, window, True)
 
 board = Board()
 
