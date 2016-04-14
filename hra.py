@@ -22,17 +22,19 @@ ANIMAL_INFO = (
     ('parrot', 0),
     ('rabbit', -65),
 )
-
-def image_load(animal_name, path, offset):
-    img = pyglet.image.load(path.format(animal_name))
+def image_load(filename, offset):
+    img = pyglet.image.load(filename)
     img.anchor_x = img.width // 2
     img.anchor_y = img.height // 2 + offset
     return img
 
-pictures = [image_load(name, IMG_PATH, 0)
+pictures = [image_load(IMG_PATH.format(name), 0)
             for name, offset in ANIMAL_INFO]
-active_pictures = [image_load(name, ACTIVE_PATH, offset)
+active_pictures = [image_load(ACTIVE_PATH.format(name), offset)
                    for name, offset in ANIMAL_INFO]
+
+active_bg_img = image_load('assets/puzzle-pack-2/PNG/Tiles grey/tileGrey_01.png', 0)
+bg_sprite = pyglet.sprite.Sprite(active_bg_img)
 
 def get_tile_size(window):
     return min(window.width / COLUMNS,
@@ -81,8 +83,17 @@ class Board:
         self.content = [[Tile() for i in range(ROWS)]
                         for j in range(COLUMNS)]
         self.last_mouse_pos = 0, 0
+        self.selected_tile = None
 
     def draw(self, window):
+        if self.selected_tile is not None:
+            logical_x, logical_y = self.selected_tile
+            x, y = logical_to_screen(logical_x, logical_y, window)
+            bg_sprite.x = x
+            bg_sprite.y = y
+            bg_sprite.color = 150, 150, 255
+            bg_sprite.draw()
+
         for x, column in enumerate(self.content):
             for y, tile in enumerate(column):
                 selected = (x, y) == board.last_mouse_pos
@@ -93,6 +104,10 @@ class Board:
         if 0 <= x < COLUMNS and 0 <= y < ROWS:
             tile = self.content[x][y]
             tile.draw(x, y, window, True)
+
+    def action(self, x, y):
+        if 0 <= x < COLUMNS and 0 <= y < ROWS:
+            self.selected_tile = x, y
 
 board = Board()
 
@@ -111,6 +126,13 @@ def on_mouse_motion(x, y, dx, dy):
     logical_x = round(logical_x)
     logical_y = round(logical_y)
     board.last_mouse_pos = logical_x, logical_y
+
+@window.event
+def on_mouse_press(x, y, button, modifiers):
+    logical_x, logical_y = screen_to_logical(x, y, window)
+    logical_x = round(logical_x)
+    logical_y = round(logical_y)
+    board.action(logical_x, logical_y)
 
 #def tik(t):
     #print(t)
