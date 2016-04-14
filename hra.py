@@ -8,12 +8,18 @@ ROWS = 8
 
 SPACING = 20
 
-obrazek = pyglet.image.load('assets/animal-pack/PNG/Square without details/penguin.png')
-obrazek.anchor_x = obrazek.width // 2
-obrazek.anchor_y = obrazek.height // 2
-sprite = pyglet.sprite.Sprite(obrazek)
-sprite.y_speed = 400
+IMG_PATH = 'assets/animal-pack/PNG/Square without details/{}.png'
+ANIMAL_NAMES = ('snake', 'penguin', 'elephant', 'monkey',
+                'giraffe', 'panda', 'pig', 'hippo', 'parrot',
+                'rabbit')
 
+def image_load(animal_name):
+    img = pyglet.image.load(IMG_PATH.format(animal_name))
+    img.anchor_x = img.width // 2
+    img.anchor_y = img.height // 2
+    return img
+
+obrazky = [image_load(name) for name in ANIMAL_NAMES]
 
 def get_tile_size(window):
     return min(window.width / COLUMNS,
@@ -31,15 +37,17 @@ def logical_to_screen(x, y, window):
 
 class Tile:
     def __init__(self):
-        self.value = random.randrange(8)
+        self.value = random.randrange(6)
+        self.sprite = pyglet.sprite.Sprite(obrazky[self.value])
 
     def draw(self, x, y, window):
         tile_size = get_tile_size(window)
+        img_width = self.sprite.image.width
         screen_x, screen_y = logical_to_screen(x, y, window)
-        sprite.x = screen_x
-        sprite.y = screen_y
-        sprite.scale = (tile_size - SPACING) / obrazek.width
-        sprite.draw()
+        self.sprite.x = screen_x
+        self.sprite.y = screen_y
+        self.sprite.scale = (tile_size - SPACING) / img_width
+        self.sprite.draw()
 
 
 class Board:
@@ -64,11 +72,6 @@ def on_draw():
     board.draw(window)
 
 def tik(t):
-    sprite.x += 100 * t
-    sprite.y += sprite.y_speed * t
-    sprite.y_speed -= 400 * t
-    if sprite.y < 0:
-        sprite.y_speed = -sprite.y_speed
     print(t)
 
 pyglet.clock.schedule_interval(tik, 1/30)
