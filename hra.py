@@ -29,20 +29,28 @@ def logical_to_screen(x, y, window):
     return screen_x, screen_y
 
 
+class Tile:
+    def __init__(self):
+        self.value = random.randrange(8)
+
+    def draw(self, x, y, window):
+        tile_size = get_tile_size(window)
+        screen_x, screen_y = logical_to_screen(x, y, window)
+        sprite.x = screen_x
+        sprite.y = screen_y
+        sprite.scale = (tile_size - SPACING) / obrazek.width
+        sprite.draw()
+
+
 class Board:
     def __init__(self):
-        self.content = [[random.randrange(8) for i in range(ROWS)]
+        self.content = [[Tile() for i in range(ROWS)]
                         for j in range(COLUMNS)]
 
     def draw(self, window):
-        tile_size = get_tile_size(window)
         for x, column in enumerate(self.content):
-            for y, num in enumerate(column):
-                screen_x, screen_y = logical_to_screen(x, y, window)
-                sprite.x = screen_x
-                sprite.y = screen_y
-                sprite.scale = (tile_size - SPACING) / obrazek.width
-                sprite.draw()
+            for y, tile in enumerate(column):
+                tile.draw(x, y, window)
 
 board = Board()
 
