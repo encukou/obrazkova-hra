@@ -107,7 +107,13 @@ class Board:
 
     def action(self, x, y):
         if 0 <= x < COLUMNS and 0 <= y < ROWS:
-            self.selected_tile = x, y
+            if self.selected_tile is None:
+                self.selected_tile = x, y
+            else:
+                other_x, other_y = self.selected_tile
+                self.content[x][y], self.content[other_x][other_y] = (
+                    self.content[other_x][other_y], self.content[x][y])
+                self.selected_tile = None
 
 board = Board()
 
