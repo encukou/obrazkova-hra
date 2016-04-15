@@ -63,9 +63,12 @@ def screen_to_logical(screen_x, screen_y, window):
 
 class Tile:
     def __init__(self):
+        self.animation = None
+        self.reset_value()
+
+    def reset_value(self):
         self.value = random.randrange(10)
         self.sprite = pyglet.sprite.Sprite(pictures[self.value])
-        self.animation = None
 
     def draw(self, x, y, window, selected=False):
         if selected:
@@ -98,6 +101,17 @@ class Board:
         self.last_mouse_pos = 0, 0
         self.selected_tile = None
         self.extra_tiles = set()
+
+        found_area = True
+        while found_area:
+            found_area = False
+            for x, column in enumerate(self.content):
+                for y, tile in enumerate(column):
+                    area = self.check_area(x, y)
+                    if len(area) >= 3:
+                        tile.reset_value()
+                        found_area = True
+                        break
 
     def draw(self, window):
         if self.selected_tile is not None:
