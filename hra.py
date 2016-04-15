@@ -7,7 +7,7 @@ COLUMNS = 8
 ROWS = 8
 
 SPACING = 20
-MOVE_SPEED = 5
+MOVE_SPEED = 0.5
 
 IMG_PATH = 'assets/animal-pack/PNG/Square without details/{}.png'
 ACTIVE_PATH = 'assets/animal-pack/PNG/Square (outline)/{}.png'
@@ -118,6 +118,9 @@ class Board:
 
     def action(self, x, y):
         if 0 <= x < COLUMNS and 0 <= y < ROWS:
+            current_tile = self.content[x][y]
+            if current_tile.animation:
+                return
             if self.selected_tile is None:
                 self.selected_tile = x, y
             elif self.selected_tile == (x, y):
