@@ -1,0 +1,15 @@
+An example game in Pyglet. Comments are all in Czech.
+
+
+Doporučuji instalovat a spouštět z virtuálního prostředí.
+Návod na to, jak nainstalovat Python a nastavit virtuální prostředí, je na:
+    http://pyladies.cz/v1/s001-install/instalace.html
+
+
+Instalace hry:
+
+    pip install -r requirements.txt
+
+Spuštění:
+
+    python hra.py
