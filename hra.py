@@ -8,6 +8,7 @@ ROWS = 8
 
 SPACING = 20
 MOVE_SPEED = 5
+EXPLODE_SPEED = 3
 
 IMG_PATH = 'assets/animal-pack/PNG/Square without details/{}.png'
 ACTIVE_PATH = 'assets/animal-pack/PNG/Square (outline)/{}.png'
@@ -66,7 +67,7 @@ class Tile:
         self.sprite = pyglet.sprite.Sprite(pictures[self.value])
         self.animation = None
 
-    def draw(self, x, y, window, selected):
+    def draw(self, x, y, window, selected=False):
         if selected:
             self.sprite.image = active_pictures[self.value]
         else:
@@ -96,6 +97,7 @@ class Board:
                         for j in range(COLUMNS)]
         self.last_mouse_pos = 0, 0
         self.selected_tile = None
+        self.extra_tiles = set()
 
     def draw(self, window):
         if self.selected_tile is not None:
@@ -116,6 +118,9 @@ class Board:
         if 0 <= x < COLUMNS and 0 <= y < ROWS:
             tile = self.content[x][y]
             tile.draw(x, y, window, True)
+
+        for x, y, tile in self.extra_tiles:
+            tile.draw(x, y, window)
 
     def action(self, x, y):
         if 0 <= x < COLUMNS and 0 <= y < ROWS:
@@ -142,6 +147,11 @@ class Board:
                 if result:
                     self.check_and_remove_area(x, y)
 
+        for x, y, tile in list(self.extra_tiles):
+            result = tile.update(t)
+            if result:
+                self.extra_tiles.remove((x, y, tile))
+
     def check_area(self, x, y):
         area = set()
         to_check = {(x, y)}
@@ -165,6 +175,9 @@ class Board:
                 for y in range(ROWS):
                     while (x, y + removed) in area:
                         removed += 1
+                    if (x, y) in area:
+                        self.extra_tiles.add((x, y, self.content[x][y]))
+                        self.content[x][y].animation = ExplodeAnimation()
                     if removed:
                         if y + removed < ROWS:
                             self.content[x][y] = self.content[x][y + removed]
@@ -191,6 +204,21 @@ class MoveAnimation:
         logical_x = x * self.pos + self.start_x * (1 - self.pos)
         logical_y = y * self.pos + self.start_y * (1 - self.pos)
         tile.sprite.x, tile.sprite.y = logical_to_screen(logical_x, logical_y, window)
+        tile.sprite.draw()
+
+
+class ExplodeAnimation:
+    def __init__(self):
+        self.pos = 0
+
+    def update(self, t):
+        self.pos += t * EXPLODE_SPEED
+        if self.pos > 1:
+            return True
+
+    def draw(self, tile, x, y, window):
+        tile.sprite.scale *= 1 + self.pos * 2
+        tile.sprite.opacity = 255 * (1 - self.pos)
         tile.sprite.draw()
 
 
