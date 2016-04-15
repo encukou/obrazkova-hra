@@ -1,7 +1,6 @@
 import random
 
 import pyglet
-window = pyglet.window.Window()
 
 COLUMNS = 8
 ROWS = 8
@@ -124,11 +123,11 @@ class Board:
 
         for x, column in enumerate(self.content):
             for y, tile in enumerate(column):
-                selected = (x, y) == board.last_mouse_pos
+                selected = (x, y) == self.last_mouse_pos
                 if not selected:
                     tile.draw(x, y, window, selected)
 
-        x, y = board.last_mouse_pos
+        x, y = self.last_mouse_pos
         if 0 <= x < COLUMNS and 0 <= y < ROWS:
             tile = self.content[x][y]
             tile.draw(x, y, window, True)
@@ -236,31 +235,35 @@ class ExplodeAnimation:
         tile.sprite.draw()
 
 
-board = Board()
+def main():
+    board = Board()
+    window = pyglet.window.Window()
 
-@window.event
-def on_text(text):
-    print(text)
+    @window.event
+    def on_text(text):
+        print(text)
 
-@window.event
-def on_draw():
-    window.clear()
-    board.draw(window)
+    @window.event
+    def on_draw():
+        window.clear()
+        board.draw(window)
 
-@window.event
-def on_mouse_motion(x, y, dx, dy):
-    logical_x, logical_y = screen_to_logical(x, y, window)
-    logical_x = round(logical_x)
-    logical_y = round(logical_y)
-    board.last_mouse_pos = logical_x, logical_y
+    @window.event
+    def on_mouse_motion(x, y, dx, dy):
+        logical_x, logical_y = screen_to_logical(x, y, window)
+        logical_x = round(logical_x)
+        logical_y = round(logical_y)
+        board.last_mouse_pos = logical_x, logical_y
 
-@window.event
-def on_mouse_press(x, y, button, modifiers):
-    logical_x, logical_y = screen_to_logical(x, y, window)
-    logical_x = round(logical_x)
-    logical_y = round(logical_y)
-    board.action(logical_x, logical_y)
+    @window.event
+    def on_mouse_press(x, y, button, modifiers):
+        logical_x, logical_y = screen_to_logical(x, y, window)
+        logical_x = round(logical_x)
+        logical_y = round(logical_y)
+        board.action(logical_x, logical_y)
 
-pyglet.clock.schedule_interval(board.update, 1/30)
+    pyglet.clock.schedule_interval(board.update, 1/30)
 
-pyglet.app.run()
+    pyglet.app.run()
+
+main()
