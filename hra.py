@@ -7,6 +7,7 @@ COLUMNS = 8
 ROWS = 8
 
 SPACING = 20
+MOVE_SPEED = 5
 
 IMG_PATH = 'assets/animal-pack/PNG/Square without details/{}.png'
 ACTIVE_PATH = 'assets/animal-pack/PNG/Square (outline)/{}.png'
@@ -63,6 +64,7 @@ class Tile:
     def __init__(self):
         self.value = random.randrange(10)
         self.sprite = pyglet.sprite.Sprite(pictures[self.value])
+        self.animation = None
 
     def draw(self, x, y, window, selected):
         if selected:
@@ -75,7 +77,16 @@ class Tile:
         self.sprite.x = screen_x
         self.sprite.y = screen_y
         self.sprite.scale = (tile_size - SPACING) / img_width
-        self.sprite.draw()
+        if self.animation:
+            self.animation.draw(self, x, y, window)
+        else:
+            self.sprite.draw()
+
+    def update(self, t):
+        if self.animation:
+            result = self.animation.update(t)
+            if result:
+                self.animation = None
 
 
 class Board:
@@ -113,7 +124,33 @@ class Board:
                 other_x, other_y = self.selected_tile
                 self.content[x][y], self.content[other_x][other_y] = (
                     self.content[other_x][other_y], self.content[x][y])
+                self.content[x][y].animation = MoveAnimation(other_x, other_y)
+                self.content[other_x][other_y].animation = MoveAnimation(x, y)
                 self.selected_tile = None
+
+    def update(self, t):
+        for column in self.content:
+            for tile in column:
+                tile.update(t)
+
+
+class MoveAnimation:
+    def __init__(self, start_x, start_y):
+        self.start_x = start_x
+        self.start_y = start_y
+        self.pos = 0
+
+    def update(self, t):
+        self.pos += t * MOVE_SPEED
+        if self.pos > 1:
+            return True
+
+    def draw(self, tile, x, y, window):
+        logical_x = x * self.pos + self.start_x * (1 - self.pos)
+        logical_y = y * self.pos + self.start_y * (1 - self.pos)
+        tile.sprite.x, tile.sprite.y = logical_to_screen(logical_x, logical_y, window)
+        tile.sprite.draw()
+
 
 board = Board()
 
@@ -140,10 +177,6 @@ def on_mouse_press(x, y, button, modifiers):
     logical_y = round(logical_y)
     board.action(logical_x, logical_y)
 
-#def tik(t):
-    #print(t)
-
-#pyglet.clock.schedule_interval(tik, 1/30)
+pyglet.clock.schedule_interval(board.update, 1/30)
 
 pyglet.app.run()
-print('Hotovo!')
