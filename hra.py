@@ -7,7 +7,7 @@ COLUMNS = 8
 ROWS = 8
 
 SPACING = 20
-MOVE_SPEED = 0.5
+MOVE_SPEED = 5
 
 IMG_PATH = 'assets/animal-pack/PNG/Square without details/{}.png'
 ACTIVE_PATH = 'assets/animal-pack/PNG/Square (outline)/{}.png'
@@ -87,6 +87,7 @@ class Tile:
             result = self.animation.update(t)
             if result:
                 self.animation = None
+            return result
 
 
 class Board:
@@ -134,9 +135,33 @@ class Board:
                 self.selected_tile = None
 
     def update(self, t):
-        for column in self.content:
-            for tile in column:
-                tile.update(t)
+        tiles_to_check = set()
+        for x, column in enumerate(self.content):
+            for y, tile in enumerate(column):
+                result = tile.update(t)
+                if result:
+                    self.check_and_remove_area(x, y)
+
+    def check_area(self, x, y):
+        area = set()
+        to_check = {(x, y)}
+        value = self.content[x][y].value
+        while to_check:
+            x, y = to_check.pop()
+            area.add((x, y))
+            for x, y in (x+1, y), (x-1, y), (x, y+1), (x, y-1):
+                if ((x, y) not in area and
+                        0 <= x < COLUMNS and 0 <= y < ROWS and
+                        self.content[x][y].value == value and
+                        not self.content[x][y].animation):
+                    to_check.add((x, y))
+        return area
+
+    def check_and_remove_area(self, x, y):
+        area = self.check_area(x, y)
+        if len(area) >= 3:
+            for x, y in area:
+                self.content[x][y].sprite.opacity = 100
 
 
 class MoveAnimation:
