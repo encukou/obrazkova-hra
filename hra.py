@@ -1,4 +1,5 @@
 import random
+import math
 
 import pyglet
 
@@ -149,8 +150,11 @@ class Board:
                 other_x, other_y = self.selected_tile
                 self.content[x][y], self.content[other_x][other_y] = (
                     self.content[other_x][other_y], self.content[x][y])
-                self.content[x][y].animation = MoveAnimation(other_x, other_y)
-                self.content[other_x][other_y].animation = MoveAnimation(x, y)
+                speed = 1 / ((x - other_x)**2 + (y - other_y)**2)**0.2
+                self.content[x][y].animation = MoveAnimation(
+                    other_x, other_y, speed)
+                self.content[other_x][other_y].animation = MoveAnimation(
+                    x, y, speed)
                 self.selected_tile = None
 
     def update(self, t):
