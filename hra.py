@@ -68,22 +68,23 @@ class Tile:
     def reset_value(self):
         self.value = random.randrange(10)
         self.sprite = pyglet.sprite.Sprite(pictures[self.value])
+        self.active_sprite = pyglet.sprite.Sprite(active_pictures[self.value])
 
     def draw(self, x, y, window, selected=False):
         if selected:
-            self.sprite.image = active_pictures[self.value]
+            sprite = self.active_sprite
         else:
-            self.sprite.image = pictures[self.value]
+            sprite = self.sprite
         tile_size = get_tile_size(window)
         img_width = pictures[0].width
         screen_x, screen_y = logical_to_screen(x, y, window)
-        self.sprite.x = screen_x
-        self.sprite.y = screen_y
-        self.sprite.scale = (tile_size - SPACING) / img_width
+        sprite.x = screen_x
+        sprite.y = screen_y
+        sprite.scale = (tile_size - SPACING) / img_width
         if self.animation:
             self.animation.draw(self, x, y, window)
         else:
-            self.sprite.draw()
+            sprite.draw()
 
     def update(self, t):
         if self.animation:
