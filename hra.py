@@ -160,18 +160,30 @@ class Board:
     def check_and_remove_area(self, x, y):
         area = self.check_area(x, y)
         if len(area) >= 3:
-            for x, y in area:
-                self.content[x][y].sprite.opacity = 100
+            for x in range(COLUMNS):
+                removed = 0
+                for y in range(ROWS):
+                    while (x, y + removed) in area:
+                        removed += 1
+                    if removed:
+                        if y + removed < ROWS:
+                            self.content[x][y] = self.content[x][y + removed]
+                        else:
+                            tile = Tile()
+                            self.content[x][y] = tile
+                        self.content[x][y].animation = MoveAnimation(
+                            x, y + removed, speed=1/removed)
 
 
 class MoveAnimation:
-    def __init__(self, start_x, start_y):
+    def __init__(self, start_x, start_y, speed=1):
         self.start_x = start_x
         self.start_y = start_y
         self.pos = 0
+        self.speed = speed
 
     def update(self, t):
-        self.pos += t * MOVE_SPEED
+        self.pos += t * MOVE_SPEED * self.speed
         if self.pos > 1:
             return True
 
