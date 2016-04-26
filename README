@@ -8,7 +8,7 @@ Návod na to, jak nainstalovat Python a nastavit virtuální prostředí, je na:
 
 Instalace hry:
 
-    pip install -r requirements.txt
+    python -m pip install -r requirements.txt
 
 Spuštění:
 
