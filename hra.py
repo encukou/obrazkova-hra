@@ -139,7 +139,7 @@ def get_tile_size(window):
     """Vrátí velikost políčka pro dané okno, v pixelech"""
     ## Abychom do herního okýnka dostali určitý počet políček vedle sebe,
     ## vydělíme šířku okýnka počtem sloupců a dostaneme velikost políčka.
-    ## Abychom tam dostali určitý počet políček pot sebe, vydělíme šířku
+    ## Abychom tam dostali určitý počet políček pod sebe, vydělíme šířku
     ## okýnka počtem sloupců.
     ## Když chceme, aby se vešla celá šachovnice, vezmeme menší z těchto
     ## hodnot – tak zajistíme že se šachovnice vejde v obou směrech.
@@ -198,16 +198,16 @@ def screen_to_logical(screen_x, screen_y, window):
 ##   všechnu herní logiku která se vztahuje jenom na jedno políčko.
 ## - Board (šachovnice) bude obsahovat seznamy všech políček ve hře
 ##   a logiku vztahující se k několika políčkům (nebo k výběru konkrétního
-##   políčka). A bue umět vykreslit celou šachovnici, nebo posunout všechny
+##   políčka). A bude umět vykreslit celou šachovnici, nebo posunout všechny
 ##   animace.
 ## - Animace: několik tříd, které se budou starat o animace políček.
 
 ## Objekty třídy Tile si neuchovávají informaci o tom, kde na šachovnici
-## se nacházejí. To může na některýchmístech způsobit trochu složitější program
-## (třeba při vykreslování je potřeba pozici pědat jako argument funkce),
+## se nacházejí. To může na některých místech způsobit trochu složitější program
+## (třeba při vykreslování je potřeba pozici předat jako argument funkce),
 ## ale výhoda je ta, že informace o pozici každého políčka je v programu jen
 ## jednou (v objektu třídy Board). Kdyby byla stejná informace na víc místech,
-## musí si programátor dávad pozor, aby si všechny výskyty vždy odpovídaly:
+## musí si programátor dávat pozor, aby si všechny výskyty vždy odpovídaly:
 ## když se něco změní na jednom místě, musí se to změnit i všude jinde.
 
 class Tile:
@@ -315,8 +315,10 @@ class Board:
         ## přeskočit a vrátit se k němu na konci.)
         for x, column in enumerate(self.content):
             for y, tile in enumerate(column):
-                ## Vždycky zkusíme políčko změnit pětkrát, pak to vzdáme,
-                ## aby to netrvalo tak dlouho.
+                ## Vždycky zkusíme políčko změnit pětkrát, pak to vzdáme:
+                ## je lepší malá šance na to že šachovnice nebude úplně
+                ## "v pořádku", než aby se hra na začátku "zasekla" v nekonečné
+                ## smyčce.
                 for iteration in range(5):
                     area = self.check_area(x, y)
                     if len(area) >= 3:
@@ -486,7 +488,7 @@ class Board:
                 ## (Poznámka: operátor "and" se nedívá na to, co je za ním,
                 ## pokud předchozí podmínka neplatí. Proto potom, co
                 ## zkontrolujeme že dané souřadnice jsou v šachovnici,
-                ## už můžeme přistupovat k políčko – self.content[x][y].)
+                ## už můžeme přistupovat k políčku – self.content[x][y].)
                 if ((x, y) not in area and
                         0 <= x < COLUMNS and 0 <= y < ROWS and
                         self.content[x][y].value == value and
